@@ -206,6 +206,12 @@ typedef struct _GLFWwindowX11 {
     Window handle;
     Window parent;
 
+    struct {
+        char *path, *owner;
+        int32_t cursor[4];
+        bool cursor_valid;
+    } fcitx;
+
     bool iconified;
     bool maximized;
 
@@ -587,3 +593,11 @@ void _glfwGetSystemContentScaleX11(float *xscale, float *yscale, bool bypass_cac
 void _glfwPushSelectionToManagerX11(void);
 void read_xi_scroll_devices(void);
 void free_dnd_data(void);
+void glfw_fcitx_init(void);
+void glfw_fcitx_terminate(void);
+void glfw_fcitx_destroy_context(_GLFWwindow *window);
+bool glfw_fcitx_update_ime_state(_GLFWwindow *window, const GLFWIMEUpdateEvent *ev);
+bool glfw_fcitx_process_key(_GLFWwindow *window, const GLFWkeyevent *ev, uint32_t state, uint32_t timestamp);
+unsigned int glfw_x11_modifiers(unsigned int state);
+void glfw_xkb_handle_x11_key_event(_GLFWwindow *window, _GLFWXKBData *xkb, const XKeyEvent *event, int action);
+void glfw_xkb_forward_fcitx_key(_GLFWwindow *window, uint32_t sym, unsigned int modifiers, int action);

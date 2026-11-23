@@ -168,6 +168,7 @@
       "x11_init.c",
       "x11_monitor.c",
       "x11_window.c",
+      "fcitx_glfw.c",
       "xkb_glfw.c",
       "dbus_glfw.c",
       "ibus_glfw.c",

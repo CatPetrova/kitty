@@ -1344,6 +1344,7 @@ typedef struct GLFWIMEUpdateEvent {
     GLFWIMEUpdateType type;
     const char *before_text, *at_text, *after_text;
     bool focused;
+    bool cancel_preedit;
     struct {
         int left, top, width, height;
     } cursor;

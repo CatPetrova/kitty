@@ -116,7 +116,10 @@ Variables that influence kitty behavior
 
 .. envvar:: GLFW_IM_MODULE
 
-   Set this to ``ibus`` to enable support for IME under X11.
+   On X11, set this to ``ibus`` or ``fcitx`` to select the input method.
+   The Fcitx D-Bus portal is available in Fcitx 4.2.9.7 and later, including
+   Fcitx 5. When this variable is unset or empty, kitty uses Fcitx if
+   ``XMODIFIERS=@im=fcitx`` is set.
 
 .. envvar:: KITTY_WAYLAND_DETECT_MODIFIERS
 

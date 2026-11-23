@@ -962,6 +962,7 @@ void
 update_ime_state_in_os_window(OSWindow *osw, Window *window, int update_focus) {
     OSWindow *orig = global_state.callback_os_window;
     global_state.callback_os_window = osw;
+    if (update_focus < 0 && window->render_data.screen) { screen_update_overlay_text(window->render_data.screen, NULL, -1); }
     if (update_focus) update_ime_focus(osw, update_focus > 0);
     if (update_focus >= 0 && window->render_data.screen) { update_ime_position(window, window->render_data.screen); }
     global_state.callback_os_window = orig;

@@ -141,7 +141,7 @@ active_window(void) {
 void
 update_ime_focus(OSWindow *osw, bool focused) {
     if (!osw || !osw->handle) return;
-    GLFWIMEUpdateEvent ev = {.focused = focused, .type = GLFW_IME_UPDATE_FOCUS};
+    GLFWIMEUpdateEvent ev = {.type = GLFW_IME_UPDATE_FOCUS, .focused = focused, .cancel_preedit = !focused};
     glfwUpdateIMEState(osw->handle, &ev);
 }
 

@@ -125,6 +125,9 @@ Detailed list of changes
 0.51.1 [2026-11-23]
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+- X11: Support text input through Fcitx when ``XMODIFIERS=@im=fcitx`` is set
+  or when :envvar:`GLFW_IM_MODULE` is set to ``fcitx``.
+
 - A new :ac:`clear_bell_indicators` action to clear the bell indicators of all
   windows, or windows matching an expression, without needing to focus them.
   This also dismisses system attention requests on macOS and X11 (:iss:`10916`)

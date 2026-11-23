@@ -1024,8 +1024,8 @@ is_switch_layout_key(xkb_keysym_t xkb_sym) {
            xkb_sym == XKB_KEY_Mode_switch;
 }
 
-void
-glfw_xkb_handle_key_event(_GLFWwindow *window, _GLFWXKBData *xkb, xkb_keycode_t xkb_keycode, int action) {
+static void
+handle_key_event(_GLFWwindow *window, _GLFWXKBData *xkb, xkb_keycode_t xkb_keycode, int action, uint32_t state UNUSED, uint32_t timestamp UNUSED) {
     if (!xkb->keymap) return;
     static char key_text[64] = {0};
     const xkb_keysym_t *syms, *clean_syms, *default_syms;
@@ -1120,6 +1120,9 @@ glfw_xkb_handle_key_event(_GLFWwindow *window, _GLFWXKBData *xkb, xkb_keycode_t 
     glfw_ev.key = glfw_sym;
     glfw_ev.mods = sg->modifiers;
     glfw_ev.text = key_text;
+#ifdef _GLFW_X11
+    if (glfw_fcitx_process_key(window, &glfw_ev, state, timestamp)) return;
+#endif
     _GLFWIBUSKeyEvent ibus_ev;
     ibus_ev.glfw_ev = glfw_ev;
     ibus_ev.ibus_keycode = ibus_keycode;
@@ -1136,3 +1139,26 @@ glfw_xkb_handle_key_event(_GLFWwindow *window, _GLFWXKBData *xkb, xkb_keycode_t 
         _glfwInputKeyboard(window, &glfw_ev);
     }
 }
+
+#ifdef _GLFW_X11
+void
+glfw_xkb_handle_x11_key_event(_GLFWwindow *window, _GLFWXKBData *xkb, const XKeyEvent *event, int action) {
+    handle_key_event(window, xkb, event->keycode, action, event->state, (uint32_t)event->time);
+}
+
+void
+glfw_xkb_forward_fcitx_key(_GLFWwindow *window, uint32_t sym, unsigned int modifiers, int action) {
+    char text[8] = {0};
+    if (action != GLFW_RELEASE && !(modifiers & (GLFW_MOD_CONTROL | GLFW_MOD_ALT | GLFW_MOD_SUPER | GLFW_MOD_HYPER | GLFW_MOD_META))) {
+        xkb_keysym_to_utf8(sym, text, sizeof(text));
+        if ((unsigned char)text[0] < 32 || text[0] == 127) text[0] = 0;
+    }
+    GLFWkeyevent ev = {.key = glfw_key_for_sym(sym), .native_key = sym, .mods = modifiers, .action = action, .text = text};
+    _glfwInputKeyboard(window, &ev);
+}
+#else
+void
+glfw_xkb_handle_key_event(_GLFWwindow *window, _GLFWXKBData *xkb, xkb_keycode_t keycode, int action) {
+    handle_key_event(window, xkb, keycode, action, 0, 0);
+}
+#endif

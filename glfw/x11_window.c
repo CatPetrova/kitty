@@ -205,9 +205,9 @@ isSelPropNewValueNotify(Display *display UNUSED, XEvent *event, XPointer pointer
 
 // Translates an X event modifier state mask
 //
-static int
-translateState(int state) {
-    int mods = 0;
+unsigned int
+glfw_x11_modifiers(unsigned int state) {
+    unsigned int mods = 0;
 
     /* Need some way to expose hyper and meta without xkbcommon-x11 */
     if (state & ShiftMask) mods |= GLFW_MOD_SHIFT;
@@ -217,10 +217,13 @@ translateState(int state) {
     if (state & LockMask) mods |= GLFW_MOD_CAPS_LOCK;
     if (state & Mod2Mask) mods |= GLFW_MOD_NUM_LOCK;
 
-    // Only button/DND events reach here; key events get their modifiers from the
-    // xkb state, which is remapped in glfw_xkb_update_modifiers(). Remap here too
-    // so mouse_map and map agree on X11.
-    return _glfwApplyModifierRemap(mods);
+    return mods;
+}
+
+static unsigned int
+translateState(unsigned int state) {
+    // Apply the same modifier remapping to pointer events as to XKB key events.
+    return _glfwApplyModifierRemap(glfw_x11_modifiers(state));
 }
 
 // Sends an EWMH or ICCCM event to the window manager
@@ -1928,7 +1931,7 @@ processEvent(XEvent *event) {
             UPDATE_KEYMAP_IF_NEEDED;
             x11_cancel_momentum_scroll_timer();
             glfw_cancel_momentum_scroll();
-            glfw_xkb_handle_key_event(window, &_glfw.x11.xkb, event->xkey.keycode, GLFW_PRESS);
+            glfw_xkb_handle_x11_key_event(window, &_glfw.x11.xkb, &event->xkey, GLFW_PRESS);
             return;
         }
 
@@ -1962,7 +1965,7 @@ processEvent(XEvent *event) {
                 }
             }
 
-            glfw_xkb_handle_key_event(window, &_glfw.x11.xkb, event->xkey.keycode, GLFW_RELEASE);
+            glfw_xkb_handle_x11_key_event(window, &_glfw.x11.xkb, &event->xkey, GLFW_RELEASE);
             return;
         }
 
@@ -2367,6 +2370,7 @@ _glfwPlatformCreateWindow(
 
 void
 _glfwPlatformDestroyWindow(_GLFWwindow *window) {
+    glfw_fcitx_destroy_context(window);
     if (_glfw.x11.disabledCursorWindow == window) _glfw.x11.disabledCursorWindow = NULL;
 
     if (window->monitor) releaseMonitor(window);
@@ -3410,7 +3414,7 @@ _glfwPlatformCreateWindowSurface(VkInstance instance, _GLFWwindow *window, const
 
 void
 _glfwPlatformUpdateIMEState(_GLFWwindow *w, const GLFWIMEUpdateEvent *ev) {
-    glfw_xkb_update_ime_state(w, &_glfw.x11.xkb, ev);
+    if (!glfw_fcitx_update_ime_state(w, ev)) glfw_xkb_update_ime_state(w, &_glfw.x11.xkb, ev);
 }
 
 int

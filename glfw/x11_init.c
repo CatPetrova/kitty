@@ -843,6 +843,7 @@ _glfwPlatformInit(bool *supports_window_occlusion) {
 
     if (!initExtensions()) return false;
 
+    glfw_fcitx_init();
     _glfw.x11.helperWindowHandle = createHelperWindow();
     _glfw.x11.hiddenCursorHandle = createHiddenCursor();
 
@@ -866,6 +867,7 @@ _glfwPlatformTerminate(void) {
     }
 
     glfw_xkb_release(&_glfw.x11.xkb);
+    glfw_fcitx_terminate();
     glfw_dbus_terminate(&_glfw.x11.dbus);
     if (_glfw.x11.mime_atoms.array) {
         for (size_t i = 0; i < _glfw.x11.mime_atoms.sz; i++) { free((void *)_glfw.x11.mime_atoms.array[i].mime); }
